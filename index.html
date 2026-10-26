@@ -4,147 +4,790 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#FBF8F4">
-<title>上线测试</title>
+<meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="no-referrer">
+<title>生日</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23D9A0A0' d='M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z'/%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#FBF8F4;
   --card:#FFFDFB;
   --pink:#F6E3E1;
+  --pink-mid:#EBCACA;
   --pink-deep:#D9A0A0;
+  --pink-ink:#C18585;
   --ink:#4A4341;
   --ink-2:#8C8179;
+  --ink-3:#A89C93;
   --line:#EDE2D9;
-  --ok:#7C9A78;
-  --no:#C18585;
+  --radius:20px;
+  --pad:24px;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
 body{
-  background:var(--bg);color:var(--ink);
+  background:var(--bg);
+  color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  font-size:17px;line-height:1.85;
-  padding:30px 22px 60px;
-  -webkit-text-size-adjust:100%;
-  animation:fade .9s ease-out both;
+  font-size:17px;
+  line-height:1.85;
+  overflow-x:hidden;
 }
-@keyframes fade{from{opacity:0;transform:translateY(10px)}}
+[hidden]{display:none !important}
+img{max-width:100%;display:block}
+button{font-family:inherit;font-size:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+input{font-family:inherit}
 
-.wrap{max-width:560px;margin:0 auto}
-.head{margin-bottom:26px}
-h1{
+/* ---------- 飘落爱心（纯装饰，不参与布局） ---------- */
+.hearts{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+}
+.hearts svg{
+  position:absolute;
+  top:-30px;
+  width:12px;
+  height:12px;
+  fill:var(--pink-deep);
+  fill-opacity:.42;
+  will-change:transform;
+  animation-name:fall;
+  animation-timing-function:linear;
+  animation-iteration-count:infinite;
+}
+@keyframes fall{
+  from{transform:translate3d(0,0,0) rotate(0deg)}
+  to{transform:translate3d(26px,128vh,0) rotate(16deg)}
+}
+.hearts svg:nth-child(1){left:8%;  width:13px;height:13px;animation-duration:27s;animation-delay:-4s}
+.hearts svg:nth-child(2){left:27%; width:10px;height:10px;animation-duration:34s;animation-delay:-16s}
+.hearts svg:nth-child(3){left:52%; width:15px;height:15px;animation-duration:31s;animation-delay:-9s}
+.hearts svg:nth-child(4){left:73%; width:11px;height:11px;animation-duration:38s;animation-delay:-24s}
+.hearts svg:nth-child(5){left:88%; width:14px;height:14px;animation-duration:29s;animation-delay:-2s}
+
+/* ---------- 视图与入场 ---------- */
+.view{
+  position:relative;
+  z-index:2;
+  min-height:100vh;
+  min-height:100dvh;
+}
+.view.in{animation:fadeUp .75s ease-out both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}}
+.wrap{max-width:560px;margin:0 auto;padding:0 var(--pad)}
+
+/* ---------- 通用按钮 ---------- */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:52px;
+  padding:0 30px;
+  border-radius:999px;
+  font-size:16px;
+  letter-spacing:.04em;
+  transition:transform .18s ease, background .18s ease;
+}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-main{background:var(--pink-deep);color:#fff;box-shadow:0 6px 18px rgba(193,133,133,.22)}
+.btn-ghost{border:1px solid var(--pink-mid);color:var(--pink-ink);background:rgba(255,253,251,.7)}
+
+/* ---------- 密码页 ---------- */
+#v-lock{display:flex;align-items:center;justify-content:center;padding:0 var(--pad)}
+.lock{
+  width:100%;
+  max-width:360px;
+  text-align:center;
+  padding-top:4vh;
+}
+.lock-heart{width:34px;height:34px;margin:0 auto 26px;fill:var(--pink-deep);fill-opacity:.5}
+.lock-title{
   font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:27px;line-height:1.45;margin:0 0 8px;font-weight:600;letter-spacing:.02em;
+  font-size:24px;font-weight:600;letter-spacing:.06em;margin:0 0 10px;
 }
-.sub{color:var(--ink-2);font-size:14px;margin:0}
-
-.card{
+.lock-sub{color:var(--ink-2);font-size:14px;margin:0 0 34px}
+.lock-field{margin-bottom:16px}
+.lock input{
+  width:100%;
+  height:58px;
+  text-align:center;
+  font-size:22px;
+  letter-spacing:.5em;
+  text-indent:.5em;
+  color:var(--ink);
   background:var(--card);
   border:1px solid var(--line);
-  border-radius:20px;
-  padding:20px 20px 18px;
-  margin-bottom:16px;
+  border-radius:16px;
+  outline:none;
+  transition:border-color .2s ease;
 }
-.card h2{
-  font-size:15px;font-weight:600;margin:0 0 12px;color:var(--pink-deep);
-  letter-spacing:.08em;
+.lock input:focus{border-color:var(--pink-mid)}
+.lock input::placeholder{letter-spacing:.1em;font-size:15px;color:var(--ink-3)}
+.lock-err{
+  min-height:24px;
+  font-size:14px;
+  color:var(--pink-ink);
+  margin:0 0 12px;
 }
-.row{
-  display:flex;justify-content:space-between;align-items:flex-start;
-  gap:14px;padding:9px 0;border-bottom:1px dashed var(--line);
+.lock .btn{width:100%}
+.lock-hint{font-size:13px;color:var(--ink-3);margin:26px 0 0;line-height:1.9}
+
+/* ---------- 封面 ---------- */
+.cover{
+  position:relative;
+  min-height:100vh;
+  min-height:100dvh;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  padding:calc(4vh + 2px) 0 calc(2vh + 4px);
 }
-.row:last-child{border-bottom:0}
-.row .k{color:var(--ink-2);font-size:14px;flex:0 0 auto}
-.row .v{text-align:right;font-size:15px;word-break:break-all}
-.ok{color:var(--ok)}
-.no{color:var(--no)}
-.big{font-size:20px;font-weight:600}
-pre{
-  background:var(--pink);border-radius:12px;padding:12px 14px;margin:10px 0 0;
-  font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-all;
-  color:var(--ink);overflow-x:auto;
-  font-family:ui-monospace,Menlo,Consolas,monospace;
+.cover-photo{
+  flex:1 1 auto;
+  min-height:34vh;
+  margin:22px var(--pad) 20px;
+  border-radius:24px;
+  background:#EDE5DF center 42% / cover no-repeat;
+  box-shadow:0 12px 30px rgba(74,67,65,.10);
 }
-.tip{font-size:13px;color:var(--ink-2);line-height:1.8;margin:10px 0 0}
-.foot{text-align:center;color:var(--ink-2);font-size:13px;margin-top:26px}
-@media (prefers-reduced-motion:reduce){body{animation:none}}
+.cover-top{
+  position:relative;
+  padding:0 var(--pad);
+  text-align:center;
+  flex:0 0 auto;
+}
+.cover-date{
+  font-size:12px;
+  letter-spacing:.34em;
+  color:var(--pink-ink);
+  margin:0 0 16px;
+}
+.cover-title{
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:34px;
+  line-height:1.4;
+  font-weight:600;
+  letter-spacing:.04em;
+  margin:0 0 14px;
+  color:var(--ink);
+}
+.cover-nick{
+  font-size:15px;
+  color:var(--ink-2);
+  letter-spacing:.2em;
+  margin:0 0 20px;
+}
+.cover-rule{
+  width:34px;height:1px;
+  background:var(--pink-mid);
+  margin:0 auto 18px;
+}
+.cover-slogan{
+  font-size:15px;
+  color:var(--ink-2);
+  letter-spacing:.06em;
+  margin:0;
+  line-height:1.9;
+}
+.cover-bottom{
+  position:relative;
+  padding:0 var(--pad);
+  text-align:center;
+  flex:0 0 auto;
+}
+.cover-bless{
+  font-size:15px;
+  line-height:2;
+  color:var(--ink);
+  margin:0 auto 28px;
+  max-width:300px;
+  opacity:.92;
+}
+.cover-acts{display:flex;flex-direction:column;gap:12px;align-items:center;margin-bottom:26px}
+.cover-acts .btn{width:100%;max-width:300px}
+.music{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:var(--ink-2);
+  padding:8px 16px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,253,251,.72);
+}
+.music-note{
+  width:16px;height:16px;
+  display:inline-block;
+  border-radius:50%;
+  border:1px solid var(--pink-deep);
+  position:relative;
+}
+.music-note::after{
+  content:"";
+  position:absolute;left:50%;top:50%;
+  width:0;height:0;
+  margin:-4px 0 0 -2px;
+  border-left:6px solid var(--pink-deep);
+  border-top:4px solid transparent;
+  border-bottom:4px solid transparent;
+}
+.music.on .music-note::after{
+  border:0;
+  width:3px;height:9px;
+  margin:-4px 0 0 -3px;
+  background:var(--pink-deep);
+  box-shadow:6px 0 0 var(--pink-deep);
+}
+
+/* ---------- 回忆录 ---------- */
+.bar{
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:rgba(251,248,244,.94);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.bar-in{
+  max-width:560px;margin:0 auto;
+  padding:12px var(--pad);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.bar-back{font-size:14px;color:var(--ink-2)}
+.bar-title{font-size:13px;color:var(--ink-3);letter-spacing:.2em}
+
+.sec{padding:44px 0 4px}
+.sec:first-of-type{padding-top:32px}
+.sec-label{
+  font-size:12px;
+  letter-spacing:.28em;
+  color:var(--pink-deep);
+  margin:0 0 12px;
+}
+.sec-title{
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:22px;
+  font-weight:600;
+  letter-spacing:.03em;
+  margin:0 0 26px;
+  color:var(--ink);
+}
+.divider{
+  height:1px;background:var(--line);
+  max-width:560px;margin:0 auto;
+}
+
+/* 计时器 */
+.timer{text-align:center;padding:6px 0 4px}
+.timer-days{
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:58px;
+  line-height:1.1;
+  font-weight:600;
+  color:var(--pink-ink);
+  letter-spacing:.02em;
+  margin:0;
+}
+.timer-days-unit{font-size:15px;color:var(--ink-2);margin-left:8px;letter-spacing:.2em}
+.timer-clock{
+  font-size:16px;
+  color:var(--ink-2);
+  letter-spacing:.16em;
+  margin:8px 0 0;
+  font-variant-numeric:tabular-nums;
+}
+.timer-note{
+  font-size:13px;
+  color:var(--ink-3);
+  line-height:2;
+  margin:20px 0 0;
+}
+.timer-note b{color:var(--pink-ink);font-weight:600}
+
+/* 时间线 */
+.tl{position:relative;padding-left:22px}
+.tl::before{
+  content:"";
+  position:absolute;left:4px;top:8px;bottom:8px;
+  width:1px;background:var(--line);
+}
+.tl-item{position:relative;padding-bottom:38px}
+.tl-item:last-child{padding-bottom:6px}
+.tl-item::before{
+  content:"";
+  position:absolute;left:-22px;top:9px;
+  width:9px;height:9px;border-radius:50%;
+  background:var(--bg);
+  border:1.5px solid var(--pink-mid);
+}
+.tl-date{font-size:13px;color:var(--pink-ink);letter-spacing:.1em;margin:0 0 6px}
+.tl-name{font-size:18px;font-weight:600;margin:0 0 8px;letter-spacing:.02em}
+.tl-text{font-size:15px;line-height:2;color:var(--ink-2);margin:0}
+.tl-img{
+  margin-top:14px;
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--pink);
+  border:1px solid var(--line);
+}
+.tl-img img{
+  width:100%;
+  aspect-ratio:4 / 3;
+  object-fit:cover;
+}
+.imgfail{
+  display:flex;align-items:center;justify-content:center;
+  aspect-ratio:4 / 3;
+  font-size:13px;color:var(--ink-3);
+  background:var(--pink);
+}
+
+/* 画廊 */
+.gal{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px 12px;
+}
+.pola{
+  background:#fff;
+  padding:8px 8px 26px;
+  border-radius:4px;
+  box-shadow:0 4px 14px rgba(74,67,65,.08);
+  transform:rotate(-1.6deg);
+  transition:transform .25s ease;
+}
+.pola:nth-child(even){transform:rotate(1.8deg)}
+.pola:active{transform:rotate(0deg) scale(.98)}
+.pola-img{
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  background:var(--pink);
+  border-radius:2px;
+}
+.pola-cap{
+  font-size:11px;
+  color:var(--ink-3);
+  text-align:center;
+  margin:8px 0 0;
+  line-height:1.5;
+  min-height:16px;
+  padding:0 2px;
+}
+
+/* 情书 */
+.letter{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:30px 24px;
+}
+.letter p{
+  font-size:16px;
+  line-height:2.1;
+  margin:0 0 18px;
+  color:var(--ink);
+  letter-spacing:.01em;
+}
+.letter p:last-child{margin-bottom:0}
+
+/* 心愿 */
+.wish{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.wish-box{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px 16px;
+}
+.wish-h{
+  font-size:13px;
+  letter-spacing:.16em;
+  color:var(--pink-deep);
+  margin:0 0 14px;
+  padding-bottom:10px;
+  border-bottom:1px dashed var(--line);
+}
+.wish-list{list-style:none;margin:0;padding:0}
+.wish-list li{
+  font-size:14px;
+  line-height:1.8;
+  color:var(--ink-2);
+  padding:7px 0 7px 20px;
+  position:relative;
+  word-break:break-word;
+}
+.wish-list li::before{
+  position:absolute;left:0;top:8px;
+  font-size:12px;
+  color:var(--pink-deep);
+}
+.wish-list.done li::before{content:"✓"}
+.wish-list.done li{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--pink-mid)}
+.wish-list.todo li::before{content:"○"}
+
+/* ---------- 彩蛋 ---------- */
+.center{text-align:center}
+.egg-sec{padding:36px 0 4px}
+.scratch{
+  position:relative;
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:linear-gradient(135deg,#FDF7F5,#F8EDEA);
+  border:1px solid var(--line);
+  min-height:132px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:22px;
+}
+.scratch-prize{
+  font-size:17px;
+  line-height:1.9;
+  color:var(--pink-ink);
+  font-weight:600;
+  margin:0;
+}
+#scratchCanvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  touch-action:none;
+}
+.scratch-tip{font-size:13px;color:var(--ink-3);margin:12px 0 0;text-align:center}
+
+.quiz-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px 20px;
+}
+.quiz-step{font-size:12px;color:var(--ink-3);letter-spacing:.2em;margin:0 0 12px}
+.quiz-q{font-size:17px;line-height:1.8;margin:0 0 20px;font-weight:600}
+.quiz-opt{
+  display:block;
+  width:100%;
+  text-align:left;
+  padding:15px 18px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin-bottom:10px;
+  font-size:15px;
+  color:var(--ink);
+  background:var(--bg);
+  transition:border-color .2s ease,background .2s ease;
+}
+.quiz-opt:active{background:var(--pink)}
+.quiz-opt.right{border-color:#A9C0A2;background:#F1F6EF;color:#5F7A59}
+.quiz-opt.wrong{border-color:var(--pink-mid);background:var(--pink)}
+.quiz-fb{font-size:14px;line-height:1.9;color:var(--pink-ink);margin:6px 0 0;min-height:24px}
+.quiz-reward{
+  font-size:14px;line-height:1.9;color:var(--ink-2);
+  margin:14px 0 0;padding-top:14px;border-top:1px dashed var(--line);
+}
+.quiz-done{text-align:center;padding:10px 0}
+.quiz-done .big{
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:20px;line-height:1.9;margin:0 0 14px;
+}
+
+/* ---------- 浮层 ---------- */
+.lightbox{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(38,32,30,.94);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+  padding:24px;
+}
+.lightbox img{max-width:100%;max-height:78vh;object-fit:contain;border-radius:6px}
+.lightbox-cap{color:#E7DAD4;font-size:13px;margin:16px 0 0;text-align:center;line-height:1.7}
+
+.sheet{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(74,67,65,.32);
+  display:flex;align-items:center;justify-content:center;
+  padding:28px;
+}
+.sheet-card{
+  background:var(--card);
+  border-radius:24px;
+  padding:34px 26px 26px;
+  width:100%;
+  max-width:330px;
+  text-align:center;
+  box-shadow:0 18px 50px rgba(74,67,65,.16);
+  animation:sheetIn .32s ease-out both;
+}
+@keyframes sheetIn{from{transform:translateY(16px) scale(.97)}}
+.sheet-label{
+  font-size:12px;letter-spacing:.26em;color:var(--pink-deep);margin:0 0 18px;
+}
+.sheet-text{
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:19px;line-height:2;color:var(--ink);margin:0 0 26px;
+}
+.sheet .btn{width:100%}
+
+/* ---------- 页脚 ---------- */
+.foot{
+  text-align:center;
+  padding:50px var(--pad) calc(40px + env(safe-area-inset-bottom));
+  color:var(--ink-3);
+  font-size:12px;
+  letter-spacing:.18em;
+  line-height:2;
+  margin:0;
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width:420px){
+  .wish{grid-template-columns:1fr}
+  .cover-title{font-size:31px}
+  .timer-days{font-size:52px}
+}
+
+/* ---------- 减少动效 ---------- */
+@media (prefers-reduced-motion:reduce){
+  .hearts{display:none}
+  .view.in{animation:none}
+  .sheet-card{animation:none}
+}
+
+/* ---------- 打印 ---------- */
+@media print{
+  .hearts,.music,.bar{display:none}
+  body{background:#fff}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="head">
-    <h1>上线测试</h1>
-    <p class="sub">如果你在微信里能读到这行字，这条路就通了</p>
-  </div>
-
-  <div class="card">
-    <h2>环境</h2>
-    <div class="row"><span class="k">协议</span><span class="v" id="proto">检测中</span></div>
-    <div class="row"><span class="k">域名</span><span class="v" id="host">检测中</span></div>
-    <div class="row"><span class="k">打开方式</span><span class="v" id="mode">检测中</span></div>
-  </div>
-
-  <div class="card">
-    <h2>数据读取</h2>
-    <div class="row"><span class="k">memo.csv</span><span class="v" id="csvState">读取中…</span></div>
-    <div class="row"><span class="k">有效行数</span><span class="v big" id="csvRows">·</span></div>
-    <div class="row"><span class="k">列数</span><span class="v" id="csvCols">·</span></div>
-    <div class="row"><span class="k">中文编码</span><span class="v" id="csvEnc">·</span></div>
-    <pre id="csvPreview">等待数据…</pre>
-  </div>
-
-  <p class="tip" id="advice">三项都跳绿，阶段 0 就算通过。有任何一项红了，把这页截图发我。</p>
-  <p class="foot">测试页 · 之后会被正式页面覆盖</p>
-
+<!-- 飘落爱心：纯装饰，关掉不影响任何内容 -->
+<div class="hearts" aria-hidden="true">
+  <svg viewBox="0 0 24 24"><path d="M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z"/></svg>
+  <svg viewBox="0 0 24 24"><path d="M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z"/></svg>
+  <svg viewBox="0 0 24 24"><path d="M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z"/></svg>
+  <svg viewBox="0 0 24 24"><path d="M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z"/></svg>
+  <svg viewBox="0 0 24 24"><path d="M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z"/></svg>
 </div>
+
+<!-- ========== 一、密码页 ========== -->
+<section class="view in" id="v-lock">
+  <div class="lock">
+    <svg class="lock-heart" viewBox="0 0 24 24"><path d="M12 20.5S3 14.8 3 8.9C3 6.2 5.1 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4 18.9 4 21 6.2 21 8.9c0 5.9-9 11.6-9 11.6z"/></svg>
+    <h2 class="lock-title">先对上暗号</h2>
+    <p class="lock-sub">这是只给你一个人做的地方</p>
+    <div class="lock-field">
+      <input id="passInput" type="password" inputmode="numeric" maxlength="8"
+             autocomplete="off" placeholder="六个数字" aria-label="密码">
+    </div>
+    <p class="lock-err" id="passErr"></p>
+    <button class="btn btn-main" id="passBtn">进去</button>
+    <p class="lock-hint" id="passHint">我们的纪念日，六位数，年月日</p>
+  </div>
+</section>
+
+<!-- ========== 二、生日封面 ========== -->
+<section class="view" id="v-home" hidden>
+  <div class="cover" id="coverBox">
+    <div class="cover-top">
+      <p class="cover-date" id="cDate">11 · 13</p>
+      <h1 class="cover-title" id="cTitle">生日快乐</h1>
+      <p class="cover-nick" id="cNick"></p>
+      <div class="cover-rule"></div>
+      <p class="cover-slogan" id="cSlogan"></p>
+    </div>
+
+    <div class="cover-photo" id="coverPhoto"></div>
+
+    <div class="cover-bottom">
+      <p class="cover-bless" id="cBless"></p>
+      <div class="cover-acts">
+        <button class="btn btn-main" id="btnMemoir">去我们的回忆录</button>
+        <button class="btn btn-ghost" id="btnEgg">拆个小彩蛋</button>
+      </div>
+      <button class="music" id="btnMusic" hidden>
+        <span class="music-note"></span>
+        <span id="musicText">点一下，有歌</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 三、回忆录 ========== -->
+<section class="view" id="v-memoir" hidden>
+  <div class="bar">
+    <div class="bar-in">
+      <button class="bar-back" id="backHome">回到上面</button>
+      <span class="bar-title">我们的回忆录</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="sec">
+      <div class="timer">
+        <p class="timer-days"><span id="tDays">0</span><span class="timer-days-unit">天</span></p>
+        <p class="timer-clock" id="tClock">00 : 00 : 00</p>
+        <p class="timer-note" id="tNote"></p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sec" id="secTimeline">
+      <p class="sec-label">TIMELINE</p>
+      <h3 class="sec-title">走过的那些日子</h3>
+      <div class="tl" id="tlList"></div>
+    </div>
+
+    <div class="sec" id="secGallery">
+      <p class="sec-label">PHOTOS</p>
+      <h3 class="sec-title" id="galTitle">一路上的样子</h3>
+      <div class="gal" id="galList"></div>
+    </div>
+
+    <div class="sec" id="secLetter">
+      <p class="sec-label">LETTER</p>
+      <h3 class="sec-title" id="letterTitle">给你的信</h3>
+      <div class="letter" id="letterBody"></div>
+    </div>
+
+    <div class="sec" id="secWish">
+      <p class="sec-label">WISHES</p>
+      <h3 class="sec-title">想一起做的事</h3>
+      <div class="wish">
+        <div class="wish-box">
+          <p class="wish-h">已完成</p>
+          <ul class="wish-list done" id="wishDone"></ul>
+        </div>
+        <div class="wish-box">
+          <p class="wish-h">待完成</p>
+          <ul class="wish-list todo" id="wishTodo"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" id="secQuote">
+      <div class="center">
+        <button class="btn btn-ghost" id="btnQuote">听一句我常想的话</button>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="foot" id="footText">只给你一个人看</p>
+</section>
+
+<!-- ========== 四、彩蛋 ========== -->
+<section class="view" id="v-egg" hidden>
+  <div class="bar">
+    <div class="bar-in">
+      <button class="bar-back" id="backHome2">回到上面</button>
+      <span class="bar-title">生日彩蛋</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="egg-sec" id="secScratch">
+      <p class="sec-label">SCRATCH</p>
+      <h3 class="sec-title">刮开看看</h3>
+      <div class="scratch" id="scratchBox">
+        <p class="scratch-prize" id="scratchPrize">今天有一份小奖励</p>
+        <canvas id="scratchCanvas"></canvas>
+      </div>
+      <p class="scratch-tip">用手指刮，刮不动就点下面</p>
+      <div class="center" style="margin-top:14px">
+        <button class="btn btn-ghost" id="btnReveal">直接揭开</button>
+      </div>
+    </div>
+
+    <div class="egg-sec" id="secQuiz">
+      <p class="sec-label">QUIZ</p>
+      <h3 class="sec-title">关于我，你能答对几道</h3>
+      <div id="quizArea"></div>
+    </div>
+  </div>
+
+  <p class="foot">只给你一个人看</p>
+</section>
+
+<!-- 浮层 -->
+<div class="lightbox" id="lightbox" hidden>
+  <img id="lightboxImg" alt="">
+  <p class="lightbox-cap" id="lightboxCap"></p>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-card">
+    <p class="sheet-label">TODAY</p>
+    <p class="sheet-text" id="sheetText"></p>
+    <button class="btn btn-ghost" id="sheetAgain">再听一句</button>
+  </div>
+</div>
+
+<audio id="bgm" preload="none" loop playsinline webkit-playsinline></audio>
 
 <script>
 (function () {
   'use strict';
 
+  /* ================= 1. 常量与状态 ================= */
+
+  /* 密码用异或打散，源码里看不到明文；210726 与 20210726 都认 */
+  var PASS_KEYS = [
+    [53, 54, 55, 48, 53, 49],
+    [53, 55, 53, 54, 55, 48, 53, 49]
+  ];
+  var XOR = 7;
+
+  var CFG = {};
+  var DATA = { timeline: [], gallery: [], letter: [], wish: [], quote: [], quiz: [], scratch: [] };
+  var loaded = false;
+  var quoteIndex = -1;
+  var quizState = { i: 0, right: 0, locked: false };
+
   var $ = function (id) { return document.getElementById(id); };
+  var views = { lock: 'v-lock', home: 'v-home', memoir: 'v-memoir', egg: 'v-egg' };
+  var current = 'lock';
 
-  /* ---------- 1. 环境检测 ---------- */
-  var proto = location.protocol;
-  var isHttp = proto === 'https:' || proto === 'http:';
-  $('proto').textContent = proto.replace(':', '') || '未知';
-  $('proto').className = 'v ' + (isHttp ? 'ok' : 'no');
-  $('host').textContent = location.host || '无（本地文件）';
-  $('host').className = 'v ' + (location.host ? 'ok' : 'no');
+  /* ================= 2. 工具 ================= */
 
-  var ua = navigator.userAgent;
-  var mode = '普通浏览器';
-  if (/MicroMessenger/i.test(ua)) { mode = '微信内置浏览器'; }
-  else if (/QQ\//i.test(ua)) { mode = 'QQ 内置浏览器'; }
-  $('mode').textContent = mode;
-  $('mode').className = 'v ' + (/MicroMessenger|QQ\//i.test(ua) ? 'ok' : 'ok');
-
-  /* ---------- 2. 编码兜底解码 ---------- */
-  /* 先用 UTF-8 严格模式解，失败再退 GBK（Excel 另存 CSV 常存成 GBK） */
-  function decodeBuffer(buf) {
-    try {
-      var t = new TextDecoder('utf-8', { fatal: true }).decode(buf);
-      return { text: stripBom(t), enc: 'UTF-8' };
-    } catch (e1) {
-      try {
-        var g = new TextDecoder('gbk').decode(buf);
-        return { text: stripBom(g), enc: 'GBK（已自动转换）' };
-      } catch (e2) {
-        return { text: stripBom(new TextDecoder('utf-8').decode(buf)), enc: 'UTF-8（含无法解码字符）' };
-      }
-    }
+  function stripBom(s) {
+    return (s && s.charCodeAt(0) === 0xFEFF) ? s.slice(1) : s;
   }
-  function stripBom(s) { return s.charCodeAt(0) === 0xFEFF ? s.slice(1) : s; }
 
-  /* ---------- 3. CSV 解析（支持引号、字段内逗号、字段内换行） ---------- */
+  function decodeBuffer(buf) {
+    if (window.TextDecoder) {
+      try { return stripBom(new TextDecoder('utf-8', { fatal: true }).decode(buf)); } catch (e1) {}
+      try { return stripBom(new TextDecoder('gbk').decode(buf)); } catch (e2) {}
+      try { return stripBom(new TextDecoder('utf-8').decode(buf)); } catch (e3) {}
+    }
+    var bytes = new Uint8Array(buf), s = '', i;
+    for (i = 0; i < bytes.length; i++) {
+      s += '%' + ('0' + bytes[i].toString(16)).slice(-2);
+    }
+    try { return stripBom(decodeURIComponent(s)); } catch (e4) { return ''; }
+  }
+
+  /* 支持引号、字段内逗号、字段内换行、双引号转义 */
   function parseCSV(text) {
     var rows = [], row = [], field = '', inQuote = false, i = 0, c;
     text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     while (i < text.length) {
-      c = text[i];
+      c = text.charAt(i);
       if (inQuote) {
         if (c === '"') {
-          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          if (text.charAt(i + 1) === '"') { field += '"'; i += 2; continue; }
           inQuote = false; i++; continue;
         }
         field += c; i++; continue;
@@ -156,52 +799,610 @@ pre{
     }
     if (field !== '' || row.length) { row.push(field); rows.push(row); }
     return rows.filter(function (r) {
-      return r.some(function (v) { return String(v).trim() !== ''; });
+      var j;
+      for (j = 0; j < r.length; j++) { if (String(r[j]).trim() !== '') { return true; } }
+      return false;
     });
   }
 
-  /* ---------- 4. 读取 memo.csv ---------- */
-  var csvUrl = 'memo.csv?v=' + Date.now();   /* 带时间戳，绕过缓存 */
+  function loadCSV(done) {
+    var url = 'memo.csv?v=' + new Date().getTime();
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    try { xhr.responseType = 'arraybuffer'; } catch (e) {}
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) { return; }
+      if (xhr.status === 200 || xhr.status === 0) {
+        var buf = xhr.response;
+        if (!buf && xhr.responseText) { done(stripBom(xhr.responseText)); return; }
+        done(decodeBuffer(buf));
+      } else {
+        done(null);
+      }
+    };
+    xhr.send();
+  }
 
-  if (!isHttp) {
-    $('csvState').textContent = '无法读取（file:// 协议被浏览器拦截）';
-    $('csvState').className = 'v no';
-    $('csvRows').textContent = '0';
-    $('csvRows').className = 'v big no';
-    $('csvCols').textContent = '·';
-    $('csvEnc').textContent = '·';
-    $('csvPreview').textContent = '现在是用本地文件直接打开的，浏览器不允许读取同目录的 memo.csv。\n把这两个文件传到 GitHub Pages 后再打开，就能读到。';
-    $('advice').textContent = '这一项红是因为用文件方式打开的。只要部署到 https 上就会变绿。';
-  } else {
-    fetch(csvUrl, { cache: 'no-store' })
-      .then(function (res) {
-        if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        return res.arrayBuffer();
-      })
-      .then(function (buf) {
-        var d = decodeBuffer(buf);
-        var rows = parseCSV(d.text);
-        var header = rows.shift() || [];
-        $('csvState').textContent = '读取成功';
-        $('csvState').className = 'v ok';
-        $('csvRows').textContent = String(rows.length);
-        $('csvRows').className = 'v big ok';
-        $('csvCols').textContent = String(header.length) + ' 列';
-        $('csvCols').className = 'v ' + (header.length >= 10 ? 'ok' : 'no');
-        $('csvEnc').textContent = d.enc;
-        $('csvEnc').className = 'v ' + (d.enc.indexOf('GBK') === -1 ? 'ok' : 'no');
-        $('csvPreview').textContent = '表头：' + header.join(' | ') + '\n\n' +
-          rows.slice(0, 3).map(function (r) { return r.slice(0, 5).join(' | '); }).join('\n');
-        $('advice').textContent = '三项都绿，阶段 0 通过。可以开始做正式页面了。';
-      })
-      .catch(function (err) {
-        $('csvState').textContent = '读取失败：' + err.message;
-        $('csvState').className = 'v no';
-        $('csvRows').textContent = '0';
-        $('csvRows').className = 'v big no';
-        $('csvPreview').textContent = '可能原因：\n1. memo.csv 没有和 index.html 放在同一层目录\n2. 文件名大小写不一致（要全小写）\n3. 文件还没提交成功\n\n错误：' + err.message;
-        $('advice').textContent = '把这一页截图发我，我按错误信息定位。';
+  function buildData(text) {
+    var rows = parseCSV(text || '');
+    if (!rows.length) { return; }
+    var head = rows.shift().map(function (h) { return String(h).trim().toLowerCase(); });
+    var idx = function (name) { return head.indexOf(name); };
+    var iType = idx('type'), iId = idx('id'), iDate = idx('date'), iTitle = idx('title');
+    var iContent = idx('content'), iImage = idx('image'), iOpt = idx('options');
+    var iAns = idx('answer'), iStatus = idx('status'), iOrder = idx('order');
+
+    rows.forEach(function (r) {
+      var type = String(r[iType] || '').trim().toLowerCase();
+      if (!type) { return; }
+      var item = {
+        id: iId > -1 ? String(r[iId] || '').trim() : '',
+        date: iDate > -1 ? String(r[iDate] || '').trim() : '',
+        title: iTitle > -1 ? String(r[iTitle] || '').trim() : '',
+        content: iContent > -1 ? String(r[iContent] || '').trim() : '',
+        image: iImage > -1 ? String(r[iImage] || '').trim() : '',
+        options: iOpt > -1 ? String(r[iOpt] || '').trim() : '',
+        answer: iAns > -1 ? String(r[iAns] || '').trim() : '',
+        status: iStatus > -1 ? String(r[iStatus] || '').trim().toLowerCase() : '',
+        order: iOrder > -1 ? (parseInt(r[iOrder], 10) || 0) : 0
+      };
+      if (type === 'config') {
+        if (item.id) { CFG[item.id] = item.content; }
+        return;
+      }
+      if (DATA[type]) { DATA[type].push(item); }
+    });
+
+    ['timeline', 'gallery'].forEach(function (k) {
+      DATA[k].sort(function (a, b) {
+        if (a.order !== b.order) { return a.order - b.order; }
+        return String(a.date).localeCompare(String(b.date));
       });
+    });
+  }
+
+  function p(text) {
+    var s = String(text || '').replace(/\\n/g, '\n');
+    return s.split('\n').filter(function (x) { return x.trim() !== ''; });
+  }
+
+  /* 固定东八区零点，避免她在别的时区打开时天数跳动 */
+  function dayStart(str) {
+    if (!str) { return 0; }
+    var m = String(str).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (!m) { return 0; }
+    return Date.parse(m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) + 'T00:00:00+08:00');
+  }
+
+  function daysSince(str) {
+    var t = dayStart(str);
+    if (!t) { return 0; }
+    return Math.floor((new Date().getTime() - t) / 86400000);
+  }
+
+  function fmtDate(str) {
+    var m = String(str || '').match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
+    if (!m) { return String(str || ''); }
+    if (!m[3]) { return m[1] + ' 年'; }
+    return m[1] + '.' + ('0' + m[2]).slice(-2) + '.' + ('0' + m[3]).slice(-2);
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ================= 3. 路由 ================= */
+
+  function show(name) {
+    if (!views[name]) { name = 'home'; }
+    current = name;
+    Object.keys(views).forEach(function (k) {
+      var el = $(views[k]);
+      if (!el) { return; }
+      if (k === name) {
+        el.hidden = false;
+        el.classList.remove('in');
+        void el.offsetWidth;
+        el.classList.add('in');
+      } else {
+        el.hidden = true;
+        el.classList.remove('in');
+      }
+    });
+    window.scrollTo(0, 0);
+    if (name === 'egg' && window.__drawScratchCover) {
+      setTimeout(window.__drawScratchCover, 30);
+    }
+  }
+
+  function go(name) {
+    if (('#' + name) === location.hash) { show(name); return; }
+    location.hash = name;
+  }
+
+  function isUnlocked() {
+    try { return sessionStorage.getItem('unlocked') === '1'; } catch (e) { return true; }
+  }
+  function markUnlocked() {
+    try { sessionStorage.setItem('unlocked', '1'); } catch (e) {}
+  }
+
+  window.addEventListener('hashchange', function () {
+    var h = location.hash.replace('#', '');
+    if (h === 'memoir' || h === 'egg' || h === 'home') {
+      if (!isUnlocked()) { go('lock'); return; }
+      show(h);
+    }
+  });
+
+  /* ================= 4. 密码 ================= */
+
+  function decodeKey(arr) {
+    var s = '', i;
+    for (i = 0; i < arr.length; i++) { s += String.fromCharCode(arr[i] ^ XOR); }
+    return s;
+  }
+
+  function checkPass(val) {
+    var v = String(val || '').replace(/\D/g, ''), i;
+    for (i = 0; i < PASS_KEYS.length; i++) {
+      if (v === decodeKey(PASS_KEYS[i])) { return true; }
+    }
+    return false;
+  }
+
+  function bindPass() {
+    var input = $('passInput'), err = $('passErr'), btn = $('passBtn');
+    if (!input) { return; }
+
+    function submit() {
+      var v = input.value;
+      if (!v) { err.textContent = '还没输呢'; return; }
+      if (checkPass(v)) {
+        err.textContent = '';
+        markUnlocked();
+        go('home');
+      } else {
+        err.textContent = '不对哦，再想想';
+        input.value = '';
+        try { input.focus(); } catch (e) {}
+      }
+    }
+
+    btn.addEventListener('click', submit);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.keyCode === 13) { submit(); }
+    });
+    input.addEventListener('input', function () {
+      err.textContent = '';
+      var v = input.value.replace(/\D/g, '');
+      if (v.length === 6 && checkPass(v)) {
+        markUnlocked();
+        go('home');
+      }
+    });
+  }
+
+  /* ================= 5. 封面 ================= */
+
+  function renderCover() {
+    var photo = $('coverPhoto');
+    var img = CFG.cover_image || '';
+    if (img && photo) { photo.style.backgroundImage = 'url("' + img.replace(/"/g, '') + '")'; }
+
+    var dateLabel = '11 · 13';
+    var m = String(CFG.birthday || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) {
+      dateLabel = ('0' + m[2]).slice(-2) + ' · ' + ('0' + m[3]).slice(-2);
+      var now = new Date();
+      var age = now.getFullYear() - parseInt(m[1], 10);
+      var thisYearBirthday = Date.parse(now.getFullYear() + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) + 'T00:00:00+08:00');
+      if (now.getTime() < thisYearBirthday) { age -= 1; }
+      if (age > 0 && age < 120) { dateLabel += '　' + age + ' 岁'; }
+    }
+    $('cDate').textContent = dateLabel;
+
+    $('cTitle').textContent = CFG.title || '生日快乐';
+    $('cNick').textContent = CFG.nickname || '';
+    $('cSlogan').textContent = CFG.slogan || '';
+    $('cBless').textContent = CFG.blessing || '';
+    $('btnMemoir').textContent = CFG.btn_memoir || '去我们的回忆录';
+    if (CFG.pass_hint) { $('passHint').textContent = CFG.pass_hint; }
+    if (CFG.footer) { $('footText').textContent = CFG.footer; }
+    if (CFG.gallery_title) { $('galTitle').textContent = CFG.gallery_title; }
+    if (CFG.letter_title) { $('letterTitle').textContent = CFG.letter_title; }
+    if (CFG.title) { document.title = CFG.title; }
+  }
+
+  function bindMusic() {
+    var audio = $('bgm'), btn = $('btnMusic'), txt = $('musicText');
+    var src = CFG.bgm || '';
+    if (!src) { btn.hidden = true; return; }
+    audio.src = src;
+    var vol = parseFloat(CFG.bgm_volume);
+    audio.volume = (vol >= 0 && vol <= 1) ? vol : 0.6;
+    btn.hidden = false;
+
+    btn.addEventListener('click', function () {
+      if (audio.paused) {
+        var pr = audio.play();
+        if (pr && pr.then) {
+          pr.then(function () {
+            btn.classList.add('on');
+            txt.textContent = '正在播放';
+          }).catch(function () {
+            txt.textContent = '再点一下试试';
+          });
+        } else {
+          btn.classList.add('on');
+          txt.textContent = '正在播放';
+        }
+      } else {
+        audio.pause();
+        btn.classList.remove('on');
+        txt.textContent = '点一下，有歌';
+      }
+    });
+
+    audio.addEventListener('error', function () {
+      txt.textContent = '歌没加载出来';
+    });
+  }
+
+  /* ================= 6. 计时器 ================= */
+
+  function tick() {
+    var start = dayStart(CFG.start_date);
+    var now = new Date().getTime();
+    var diff = start ? now - start : 0;
+    if (diff < 0) { diff = 0; }
+    var days = Math.floor(diff / 86400000);
+    var rest = diff - days * 86400000;
+    var h = Math.floor(rest / 3600000);
+    var mi = Math.floor((rest % 3600000) / 60000);
+    var s = Math.floor((rest % 60000) / 1000);
+
+    $('tDays').textContent = String(days);
+    $('tClock').textContent =
+      ('0' + h).slice(-2) + ' : ' + ('0' + mi).slice(-2) + ' : ' + ('0' + s).slice(-2);
+
+    if (!tick.noted) {
+      var notes = [];
+      if (CFG.first_love) { notes.push('从第一次说喜欢，已经 <b>' + daysSince(CFG.first_love) + '</b> 天'); }
+      if (CFG.far_date) { notes.push('异地 <b>' + daysSince(CFG.far_date) + '</b> 天，还在继续'); }
+      if (CFG.meet_date) { notes.push('从加上微信算起，<b>' + daysSince(CFG.meet_date) + '</b> 天'); }
+      $('tNote').innerHTML = notes.join('<br>');
+      tick.noted = true;
+    }
+  }
+
+  /* ================= 7. 时间线 ================= */
+
+  function renderTimeline() {
+    var box = $('tlList');
+    var list = DATA.timeline;
+    if (!list.length) { $('secTimeline').hidden = true; return; }
+
+    var html = '';
+    list.forEach(function (it) {
+      html += '<div class="tl-item">';
+      html += '<p class="tl-date">' + esc(fmtDate(it.date)) + '</p>';
+      if (it.title) { html += '<p class="tl-name">' + esc(it.title) + '</p>'; }
+      if (it.content) { html += '<p class="tl-text">' + esc(it.content) + '</p>'; }
+      if (it.image) {
+        html += '<div class="tl-img"><img src="' + esc(it.image) + '" alt="" loading="lazy"></div>';
+      }
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    bindImageFail(box);
+  }
+
+  /* ================= 8. 画廊 ================= */
+
+  function renderGallery() {
+    var box = $('galList');
+    var list = DATA.gallery.filter(function (x) { return x.image; });
+    if (!list.length) { $('secGallery').hidden = true; return; }
+
+    var html = '';
+    list.forEach(function (it, i) {
+      html += '<div class="pola" data-i="' + i + '">';
+      html += '<img class="pola-img" src="' + esc(it.image) + '" alt="" loading="lazy">';
+      html += '<p class="pola-cap">' + esc(it.title || '') + '</p>';
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    bindImageFail(box);
+
+    box.addEventListener('click', function (e) {
+      var card = e.target;
+      while (card && card !== box && card.getAttribute('data-i') === null) { card = card.parentNode; }
+      if (!card || card === box) { return; }
+      var it = list[parseInt(card.getAttribute('data-i'), 10)];
+      if (it) { openLightbox(it.image, it.title || ''); }
+    });
+  }
+
+  function bindImageFail(scope) {
+    var imgs = scope.querySelectorAll('img'), i;
+    for (i = 0; i < imgs.length; i++) {
+      imgs[i].addEventListener('error', function () {
+        var box = document.createElement('div');
+        box.className = 'imgfail';
+        box.textContent = '照片没加载出来';
+        if (this.parentNode) { this.parentNode.replaceChild(box, this); }
+      });
+    }
+  }
+
+  function openLightbox(src, cap) {
+    $('lightboxImg').src = src;
+    $('lightboxCap').textContent = cap || '';
+    $('lightbox').hidden = false;
+  }
+
+  /* ================= 9. 情书 ================= */
+
+  function renderLetter() {
+    var body = $('letterBody');
+    if (!DATA.letter.length) { $('secLetter').hidden = true; return; }
+    var html = '';
+    DATA.letter.forEach(function (it) {
+      p(it.content).forEach(function (t) { html += '<p>' + esc(t) + '</p>'; });
+    });
+    body.innerHTML = html;
+  }
+
+  /* ================= 10. 心愿 ================= */
+
+  function renderWish() {
+    var done = DATA.wish.filter(function (x) { return x.status === 'done'; });
+    var todo = DATA.wish.filter(function (x) { return x.status !== 'done'; });
+    if (!done.length && !todo.length) { $('secWish').hidden = true; return; }
+
+    var htmlD = '', htmlT = '';
+    done.forEach(function (it) { htmlD += '<li>' + esc(it.title || it.content) + '</li>'; });
+    todo.forEach(function (it) { htmlT += '<li>' + esc(it.title || it.content) + '</li>'; });
+    $('wishDone').innerHTML = htmlD || '<li>等我们一起填</li>';
+    $('wishTodo').innerHTML = htmlT || '<li>等我们一起填</li>';
+  }
+
+  /* ================= 11. 随机情话 ================= */
+
+  function bindQuote() {
+    var list = DATA.quote.filter(function (x) { return x.content; });
+    if (!list.length) { $('secQuote').hidden = true; return; }
+
+    function pick() {
+      if (list.length === 1) { return list[0].content; }
+      var i = quoteIndex, guard = 0;
+      while (i === quoteIndex && guard < 30) {
+        i = Math.floor(Math.random() * list.length);
+        guard++;
+      }
+      quoteIndex = i;
+      return list[i].content;
+    }
+
+    $('btnQuote').addEventListener('click', function () {
+      $('sheetText').textContent = pick();
+      $('sheet').hidden = false;
+    });
+    $('sheetAgain').addEventListener('click', function () {
+      $('sheetText').textContent = pick();
+    });
+    $('sheet').addEventListener('click', function (e) {
+      if (e.target === this) { this.hidden = true; }
+    });
+  }
+
+  /* ================= 12. 刮刮卡 ================= */
+
+  function renderScratch() {
+    var box = $('scratchBox'), cv = $('scratchCanvas');
+    var list = DATA.scratch.filter(function (x) { return x.content; });
+    if (!list.length) { $('secScratch').hidden = true; return; }
+
+    $('scratchPrize').textContent = list[Math.floor(Math.random() * list.length)].content;
+
+    /* 彩蛋视图初始是隐藏的，尺寸为 0，所以涂层要在真正显示之后再画 */
+    function drawCover() {
+      if (cv.getAttribute('data-drawn') === '1') { return; }
+      var w = box.clientWidth, h = box.clientHeight;
+      if (!w || !h) { return; }
+      cv.setAttribute('data-drawn', '1');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      cv.style.width = w + 'px';
+      cv.style.height = h + 'px';
+      var ctx = cv.getContext('2d');
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+        var g = ctx.createLinearGradient(0, 0, w, h);
+        g.addColorStop(0, '#E7D9D3');
+        g.addColorStop(1, '#F2E5E0');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(140,124,116,.55)';
+        ctx.font = '600 15px -apple-system,sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('用手指刮开', w / 2, h / 2 + 5);
+
+        var drawing = false;
+        var lastX = 0, lastY = 0;
+
+        function pos(e) {
+          var r = cv.getBoundingClientRect();
+          var t = e.touches ? e.touches[0] : e;
+          return { x: t.clientX - r.left, y: t.clientY - r.top };
+        }
+        function begin(e) {
+          drawing = true;
+          e.preventDefault();
+          var p2 = pos(e);
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath();
+          ctx.arc(p2.x, p2.y, 15, 0, Math.PI * 2);
+          ctx.fill();
+          lastX = p2.x; lastY = p2.y;
+        }
+        function move(e) {
+          if (!drawing) { return; }
+          e.preventDefault();
+          var p2 = pos(e);
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.lineWidth = 30;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(lastX, lastY);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+          lastX = p2.x; lastY = p2.y;
+        }
+        function end() { drawing = false; }
+
+        cv.addEventListener('touchstart', begin, { passive: false });
+        cv.addEventListener('touchmove', move, { passive: false });
+        cv.addEventListener('touchend', end, { passive: false });
+        cv.addEventListener('mousedown', begin);
+        cv.addEventListener('mousemove', move);
+        cv.addEventListener('mouseup', end);
+        cv.addEventListener('mouseleave', end);
+      }
+    }
+
+    drawCover();
+    window.__drawScratchCover = drawCover;
+
+    $('btnReveal').addEventListener('click', function () {
+      cv.style.transition = 'opacity .45s ease';
+      cv.style.opacity = '0';
+      setTimeout(function () { cv.style.display = 'none'; }, 480);
+    });
+  }
+
+  /* ================= 13. 问答 ================= */
+
+  function renderQuiz() {
+    var area = $('quizArea');
+    var list = DATA.quiz.filter(function (x) { return x.title; });
+    if (!list.length) { $('secQuiz').hidden = true; return; }
+
+    function showDone() {
+      var pass = CFG.quiz_pass || '全对。';
+      var html = '<div class="quiz-card quiz-done">';
+      html += '<p class="big">' + esc(pass) + '</p>';
+      html += '<p class="quiz-reward">答对 ' + quizState.right + ' / ' + list.length + ' 题</p>';
+      html += '</div>';
+      area.innerHTML = html;
+    }
+
+    function showQ() {
+      if (quizState.i >= list.length) { showDone(); return; }
+      var it = list[quizState.i];
+      var opts = String(it.options || '').split('|').filter(function (x) { return x.trim() !== ''; });
+      quizState.locked = false;
+
+      var html = '<div class="quiz-card">';
+      html += '<p class="quiz-step">第 ' + (quizState.i + 1) + ' / ' + list.length + ' 题</p>';
+      html += '<p class="quiz-q">' + esc(it.title) + '</p>';
+      opts.forEach(function (o, i) {
+        html += '<button class="quiz-opt" data-i="' + (i + 1) + '">' + esc(o.trim()) + '</button>';
+      });
+      html += '<p class="quiz-fb" id="quizFb"></p>';
+      html += '</div>';
+      area.innerHTML = html;
+
+      var btns = area.querySelectorAll('.quiz-opt'), k;
+      var correct = parseInt(String(it.answer || '').replace(/\D/g, '') || '0', 10);
+
+      for (k = 0; k < btns.length; k++) {
+        btns[k].addEventListener('click', function () {
+          if (quizState.locked) { return; }
+          quizState.locked = true;
+          var picked = parseInt(this.getAttribute('data-i'), 10);
+          var fb = $('quizFb');
+          if (picked === correct) {
+            this.className = 'quiz-opt right';
+            quizState.right++;
+            fb.textContent = '答对了';
+          } else {
+            this.className = 'quiz-opt wrong';
+            fb.textContent = '这个不对，答案是「' + (opts[correct - 1] || '') + '」';
+          }
+          if (it.content) { fb.innerHTML += '<br>' + esc(it.content); }
+          setTimeout(function () { quizState.i++; showQ(); }, it.content ? 1900 : 1300);
+        });
+      }
+    }
+
+    showQ();
+  }
+
+  /* ================= 14. 导航绑定 ================= */
+
+  function bindNav() {
+    $('btnMemoir').addEventListener('click', function () { go('memoir'); });
+    $('btnEgg').addEventListener('click', function () { go('egg'); });
+    $('backHome').addEventListener('click', function () { go('home'); });
+    $('backHome2').addEventListener('click', function () { go('home'); });
+
+    $('lightbox').addEventListener('click', function () {
+      this.hidden = true;
+      $('lightboxImg').src = '';
+    });
+  }
+
+  /* ================= 15. 启动 ================= */
+
+  function boot() {
+    bindPass();
+    bindNav();
+
+    loadCSV(function (text) {
+      if (text) { buildData(text); loaded = true; }
+
+      renderCover();
+      bindMusic();
+
+      if (loaded) {
+        renderTimeline();
+        renderGallery();
+        renderLetter();
+        renderWish();
+        renderQuiz();
+        renderScratch();
+        bindQuote();
+
+        /* 彩蛋里一样东西都没有时，把封面那个入口收起来，避免点进去是空页 */
+        var hasEgg = DATA.quiz.length > 0 || DATA.scratch.length > 0;
+        if (!hasEgg) { $('btnEgg').hidden = true; }
+      } else {
+        /* 读不到 CSV 时，封面和密码照常可用，只藏起需要数据的板块 */
+        ['secTimeline', 'secGallery', 'secLetter', 'secWish', 'secQuote'].forEach(function (id) {
+          var el = $(id); if (el) { el.hidden = true; }
+        });
+      }
+
+      tick();
+      setInterval(tick, 1000);
+
+      var h = location.hash.replace('#', '');
+      if (!isUnlocked()) { show('lock'); return; }
+      if (h === 'memoir' || h === 'egg' || h === 'home') { show(h); }
+      else { show('home'); }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
   }
 })();
 </script>
