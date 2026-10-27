@@ -1445,12 +1445,13 @@ input{font-family:inherit}
             this.className = 'quiz-opt right';
             quizState.right++;
             fb.textContent = '答对了';
+            if (it.content) { fb.innerHTML += '<br>' + esc(it.content); }
           } else {
             this.className = 'quiz-opt wrong';
             fb.textContent = '这个不对，答案是「' + (opts[correct - 1] || '') + '」';
           }
-          if (it.content) { fb.innerHTML += '<br>' + esc(it.content); }
-          setTimeout(function () { quizState.i++; showQ(); }, it.content ? 1900 : 1300);
+          var wait = (picked === correct && it.content) ? 1900 : 1300;
+          setTimeout(function () { quizState.i++; showQ(); }, wait);
         });
       }
     }
