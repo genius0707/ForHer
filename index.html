@@ -1408,7 +1408,10 @@ input{font-family:inherit}
     if (!list.length) { $('secQuiz').hidden = true; return; }
 
     function showDone() {
-      var pass = CFG.quiz_pass || '全对。';
+      var perfect = quizState.right === list.length;
+      var pass = perfect
+        ? (CFG.quiz_pass || '全对。')
+        : (CFG.quiz_less || '差一点。剩下的我以后慢慢讲给你听。');
       var html = '<div class="quiz-card quiz-done">';
       html += '<p class="big">' + esc(pass) + '</p>';
       html += '<p class="quiz-reward">答对 ' + quizState.right + ' / ' + list.length + ' 题</p>';
