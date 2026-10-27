@@ -400,6 +400,33 @@ input{font-family:inherit}
 }
 .letter p:last-child{margin-bottom:0}
 
+/* 小视频 */
+.clips{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.clip{
+  margin:0;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:8px 8px 4px;
+}
+.clip video{
+  width:100%;
+  display:block;
+  border-radius:10px;
+  background:#EFE7E1;
+}
+.clip figcaption{
+  font-size:13px;
+  color:var(--ink-3);
+  text-align:center;
+  padding:9px 2px 8px;
+  letter-spacing:.02em;
+}
+
 /* 她写的 */
 .sec-note{
   font-size:14px;
@@ -750,6 +777,13 @@ input{font-family:inherit}
       <div class="gal" id="galList"></div>
     </div>
 
+    <div class="sec" id="secClips">
+      <p class="sec-label">CLIPS</p>
+      <h3 class="sec-title">等你的那几年</h3>
+      <p class="sec-note">这几段都只有几秒，没有声音。点一下就能放。</p>
+      <div class="clips" id="clipList"></div>
+    </div>
+
     <div class="sec" id="secLetter">
       <p class="sec-label">LETTER</p>
       <h3 class="sec-title" id="letterTitle">给你的信</h3>
@@ -852,7 +886,7 @@ input{font-family:inherit}
   var XOR = 7;
 
   var CFG = {};
-  var DATA = { timeline: [], voice: [], gallery: [], letter: [], hers: [], wish: [], quote: [], quiz: [], scratch: [] };
+  var DATA = { timeline: [], voice: [], gallery: [], clips: [], letter: [], hers: [], wish: [], quote: [], quiz: [], scratch: [] };
   var loaded = false;
   var quoteIndex = -1;
   var quizState = { i: 0, right: 0, locked: false };
@@ -954,7 +988,7 @@ input{font-family:inherit}
       if (DATA[type]) { DATA[type].push(item); }
     });
 
-    ['timeline', 'gallery', 'hers'].forEach(function (k) {
+    ['timeline', 'gallery', 'hers', 'clips'].forEach(function (k) {
       DATA[k].sort(function (a, b) {
         if (a.order !== b.order) { return a.order - b.order; }
         return String(a.date).localeCompare(String(b.date));
@@ -1306,6 +1340,21 @@ input{font-family:inherit}
     });
   }
 
+  function renderClips() {
+    var box = $('clipList');
+    if (!box) { return; }
+    var list = DATA.clips.filter(function (x) { return x.image; });
+    if (!list.length) { $('secClips').hidden = true; return; }
+    var html = '';
+    list.forEach(function (it) {
+      html += '<figure class="clip">';
+      html += '<video src="' + esc(it.image) + '" controls muted playsinline preload="metadata"></video>';
+      if (it.title) { html += '<figcaption>' + esc(it.title) + '</figcaption>'; }
+      html += '</figure>';
+    });
+    box.innerHTML = html;
+  }
+
   function bindImageFail(scope) {
     var imgs = scope.querySelectorAll('img'), i;
     for (i = 0; i < imgs.length; i++) {
@@ -1575,6 +1624,7 @@ input{font-family:inherit}
         renderTimeline();
         renderVoice();
         renderGallery();
+        renderClips();
         renderLetter();
         renderHers();
         renderWish();
@@ -1587,7 +1637,7 @@ input{font-family:inherit}
         if (!hasEgg) { $('btnEgg').hidden = true; }
       } else {
         /* 读不到 CSV 时，封面和密码照常可用，只藏起需要数据的板块 */
-        ['secTimeline', 'secGallery', 'secLetter', 'secHers', 'secWish', 'secQuote'].forEach(function (id) {
+        ['secTimeline', 'secGallery', 'secClips', 'secLetter', 'secHers', 'secWish', 'secQuote'].forEach(function (id) {
           var el = $(id); if (el) { el.hidden = true; }
         });
       }
