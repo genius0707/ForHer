@@ -403,7 +403,7 @@ input{font-family:inherit}
 /* 小视频 */
 .clips{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr;
   gap:12px;
 }
 .clip{
@@ -415,6 +415,8 @@ input{font-family:inherit}
 }
 .clip video{
   width:100%;
+  max-height:58vh;
+  object-fit:contain;
   display:block;
   border-radius:10px;
   background:#EFE7E1;
