@@ -563,6 +563,33 @@ input{font-family:inherit}
 }
 
 /* ---------- 打印 ---------- */
+/* ===== 录音板块 ===== */
+.voice-intro{
+  font-size:16px;line-height:1.95;color:var(--ink-2);
+  margin:0 0 24px;
+}
+.voice-item{
+  background:var(--card);border-radius:var(--radius);
+  padding:18px 18px 16px;margin-bottom:14px;
+  box-shadow:0 6px 18px rgba(74,67,65,.05);
+}
+.voice-meta{
+  font-size:13px;color:var(--ink-3);margin:0 0 8px;letter-spacing:.02em;
+}
+.voice-line{
+  font-size:16px;line-height:1.85;color:var(--ink);margin:0 0 14px;
+}
+.voice-play{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--line);background:var(--bg);
+  color:var(--ink-2);border-radius:999px;
+  padding:9px 17px;font-size:14px;font-family:inherit;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.voice-play:active{transform:translateY(1px)}
+.voice-play.on{background:var(--pink);border-color:var(--pink-mid);color:var(--pink-ink)}
+.voice-play .vp-ico{font-size:12px}
+
 @media print{
   .hearts,.music,.bar{display:none}
   body{background:#fff}
@@ -648,6 +675,14 @@ input{font-family:inherit}
       <p class="sec-label">TIMELINE</p>
       <h3 class="sec-title">走过的那些日子</h3>
       <div class="tl" id="tlList"></div>
+    </div>
+
+    <div class="sec" id="secVoice" hidden>
+      <p class="sec-label">VOICE</p>
+      <h3 class="sec-title">寝室那部座机</h3>
+      <p class="voice-intro" id="voiceIntro"></p>
+      <div class="voice-list" id="voiceList"></div>
+      <audio id="vAudio" preload="none" playsinline webkit-playsinline></audio>
     </div>
 
     <div class="sec" id="secGallery">
@@ -751,7 +786,7 @@ input{font-family:inherit}
   var XOR = 7;
 
   var CFG = {};
-  var DATA = { timeline: [], gallery: [], letter: [], wish: [], quote: [], quiz: [], scratch: [] };
+  var DATA = { timeline: [], voice: [], gallery: [], letter: [], wish: [], quote: [], quiz: [], scratch: [] };
   var loaded = false;
   var quoteIndex = -1;
   var quizState = { i: 0, right: 0, locked: false };
@@ -1080,6 +1115,85 @@ input{font-family:inherit}
 
   /* ================= 7. 时间线 ================= */
 
+  /* ================= 7.5 录音 ================= */
+  function renderVoice() {
+    var list = DATA.voice;
+    if (!list.length) { $('secVoice').hidden = true; return; }
+    $('secVoice').hidden = false;
+
+    var intro = $('voiceIntro');
+    var it = CFG.voice_intro || '';
+    if (it) {
+      intro.innerHTML = esc(it).replace(/\n/g, '<br>');
+    } else {
+      intro.hidden = true;
+    }
+
+    var box = $('voiceList');
+    var au = $('vAudio');
+    box.innerHTML = '';
+
+    list.forEach(function (r) {
+      var d = document.createElement('div');
+      d.className = 'voice-item';
+
+      var meta = [];
+      if (r.date) { meta.push(fmtDate(r.date)); }
+      if (r.title) { meta.push(r.title); }
+
+      d.innerHTML =
+        (meta.length ? '<p class="voice-meta">' + esc(meta.join('　')) + '</p>' : '') +
+        '<p class="voice-line">' + esc(r.content || '') + '</p>' +
+        '<button class="voice-play" type="button">' +
+          '<span class="vp-ico">▶</span><span class="vp-txt">听这一段</span>' +
+        '</button>';
+
+      var btn = d.querySelector('.voice-play');
+      var txt = btn.querySelector('.vp-txt');
+      var ico = btn.querySelector('.vp-ico');
+      var src = r.image || '';
+
+      if (!src) { btn.hidden = true; }
+
+      btn.addEventListener('click', function () {
+        if (!src) { return; }
+        if (au.getAttribute('data-src') !== src) {
+          au.pause();
+          au.setAttribute('data-src', src);
+          au.src = src;
+          resetAll();
+          au.play();
+          btn.classList.add('on'); txt.textContent = '正在播放'; ico.textContent = '❚❚';
+          return;
+        }
+        if (au.paused) {
+          au.play();
+          btn.classList.add('on'); txt.textContent = '正在播放'; ico.textContent = '❚❚';
+        } else {
+          au.pause();
+          btn.classList.remove('on'); txt.textContent = '继续听'; ico.textContent = '▶';
+        }
+      });
+
+      au.addEventListener('ended', function () {
+        if (au.getAttribute('data-src') === src) {
+          btn.classList.remove('on'); txt.textContent = '再听一遍'; ico.textContent = '▶';
+        }
+      });
+
+      box.appendChild(d);
+    });
+
+    function resetAll() {
+      var bs = box.querySelectorAll('.voice-play');
+      for (var i = 0; i < bs.length; i++) {
+        bs[i].classList.remove('on');
+        bs[i].querySelector('.vp-txt').textContent = '听这一段';
+        bs[i].querySelector('.vp-ico').textContent = '▶';
+      }
+    }
+  }
+
   function renderTimeline() {
     var box = $('tlList');
     var list = DATA.timeline;
@@ -1372,6 +1486,7 @@ input{font-family:inherit}
 
       if (loaded) {
         renderTimeline();
+        renderVoice();
         renderGallery();
         renderLetter();
         renderWish();
