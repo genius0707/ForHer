@@ -792,6 +792,13 @@ input{font-family:inherit}
       <div class="letter" id="letterBody"></div>
     </div>
 
+    <div class="sec" id="secMine">
+      <p class="sec-label">FROM ME</p>
+      <h3 class="sec-title">我写给你的</h3>
+      <p class="sec-note">这两篇是我写的，字不好看，话也不多，但都是真的。</p>
+      <div class="hers" id="mineList"></div>
+    </div>
+
     <div class="sec" id="secHers">
       <p class="sec-label">FROM YOU</p>
       <h3 class="sec-title">你写给我的</h3>
@@ -888,7 +895,7 @@ input{font-family:inherit}
   var XOR = 7;
 
   var CFG = {};
-  var DATA = { timeline: [], voice: [], gallery: [], clips: [], letter: [], hers: [], wish: [], quote: [], quiz: [], scratch: [] };
+  var DATA = { timeline: [], voice: [], gallery: [], clips: [], letter: [], mine: [], hers: [], wish: [], quote: [], quiz: [], scratch: [] };
   var loaded = false;
   var quoteIndex = -1;
   var quizState = { i: 0, right: 0, locked: false };
@@ -990,7 +997,7 @@ input{font-family:inherit}
       if (DATA[type]) { DATA[type].push(item); }
     });
 
-    ['timeline', 'gallery', 'hers', 'clips'].forEach(function (k) {
+    ['timeline', 'gallery', 'hers', 'mine', 'clips'].forEach(function (k) {
       DATA[k].sort(function (a, b) {
         if (a.order !== b.order) { return a.order - b.order; }
         return String(a.date).localeCompare(String(b.date));
@@ -1387,11 +1394,11 @@ input{font-family:inherit}
     body.innerHTML = html;
   }
 
-  function renderHers() {
-    var box = $('hersList');
+  function renderBlock(type, boxId, secId) {
+    var box = $(boxId);
     if (!box) { return; }
-    var list = DATA.hers.filter(function (x) { return x.content; });
-    if (!list.length) { $('secHers').hidden = true; return; }
+    var list = DATA[type].filter(function (x) { return x.content; });
+    if (!list.length) { $(secId).hidden = true; return; }
     var html = '';
     list.forEach(function (it, i) {
       html += '<details class="hers-item"' + (i === 0 ? ' open' : '') + '>';
@@ -1403,6 +1410,10 @@ input{font-family:inherit}
     });
     box.innerHTML = html;
   }
+
+  function renderMine() { renderBlock('mine', 'mineList', 'secMine'); }
+
+  function renderHers() { renderBlock('hers', 'hersList', 'secHers'); }
 
   /* ================= 10. 心愿 ================= */
 
@@ -1628,6 +1639,7 @@ input{font-family:inherit}
         renderGallery();
         renderClips();
         renderLetter();
+        renderMine();
         renderHers();
         renderWish();
         renderQuiz();
@@ -1639,7 +1651,7 @@ input{font-family:inherit}
         if (!hasEgg) { $('btnEgg').hidden = true; }
       } else {
         /* 读不到 CSV 时，封面和密码照常可用，只藏起需要数据的板块 */
-        ['secTimeline', 'secGallery', 'secClips', 'secLetter', 'secHers', 'secWish', 'secQuote'].forEach(function (id) {
+        ['secTimeline', 'secGallery', 'secClips', 'secLetter', 'secMine', 'secHers', 'secWish', 'secQuote'].forEach(function (id) {
           var el = $(id); if (el) { el.hidden = true; }
         });
       }
