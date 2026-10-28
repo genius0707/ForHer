@@ -436,6 +436,34 @@ input{font-family:inherit}
   color:var(--ink-3);
   margin:-6px 0 22px;
 }
+.statrow{
+  display:flex;
+  gap:10px;
+  margin:0 0 22px;
+}
+.statrow div{
+  flex:1;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px 6px;
+  text-align:center;
+}
+.statrow b{
+  display:block;
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:25px;
+  line-height:1.15;
+  color:var(--ink);
+}
+.statrow i{
+  display:block;
+  font-style:normal;
+  font-size:11.5px;
+  color:var(--ink-3);
+  margin-top:7px;
+  letter-spacing:.04em;
+}
 .hers-item{
   background:var(--card);
   border:1px solid var(--line);
@@ -795,7 +823,12 @@ input{font-family:inherit}
     <div class="sec" id="secMine">
       <p class="sec-label">FROM ME</p>
       <h3 class="sec-title">我写给你的</h3>
-      <p class="sec-note">这些是我写在便签里发给你的，从第一百天写到两周年，挑了几篇，一个字没改。</p>
+      <p class="sec-note">从第一百天写到两周年，一共写了十八篇，这里挑了几篇，一个字没改。</p>
+      <div class="statrow">
+        <div><b>18</b><i>篇便签</i></div>
+        <div><b>3</b><i>年</i></div>
+        <div><b>1916</b><i>字（这五篇）</i></div>
+      </div>
       <div class="hers" id="mineList"></div>
     </div>
 
