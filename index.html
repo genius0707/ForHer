@@ -1193,6 +1193,20 @@ input{font-family:inherit}
     if (CFG.title) { document.title = CFG.title; }
   }
 
+  /* 进回忆录后，趁她看计时器那几秒，把后面的照片悄悄下完，滚到时不用等 */
+  var warmed = false;
+  function warmImages() {
+    if (warmed) { return; }
+    warmed = true;
+    setTimeout(function () {
+      var list = document.querySelectorAll('#v-memoir img[loading="lazy"]');
+      for (var i = 0; i < list.length; i++) {
+        var src = list[i].getAttribute('src');
+        if (src) { var pre = new Image(); pre.src = src; }
+      }
+    }, 600);
+  }
+
   function bindMusic() {
     var audio = $('bgm'), btn = $('btnMusic'), txt = $('musicText');
     var src = CFG.bgm || '';
@@ -1653,7 +1667,7 @@ input{font-family:inherit}
   /* ================= 14. 导航绑定 ================= */
 
   function bindNav() {
-    $('btnMemoir').addEventListener('click', function () { go('memoir'); });
+    $('btnMemoir').addEventListener('click', function () { go('memoir'); warmImages(); });
     $('btnEgg').addEventListener('click', function () { go('egg'); });
     $('backHome').addEventListener('click', function () { go('home'); });
     $('backHome2').addEventListener('click', function () { go('home'); });
