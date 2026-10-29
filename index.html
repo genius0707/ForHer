@@ -706,6 +706,132 @@ input{font-family:inherit}
 .voice-play.on{background:var(--pink);border-color:var(--pink-mid);color:var(--pink-ink)}
 .voice-play .vp-ico{font-size:12px}
 
+/* ===== 我们的数字 ===== */
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.stat{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px 12px 17px;
+  text-align:center;
+}
+.stat b{
+  display:block;
+  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
+  font-size:33px;
+  font-weight:400;
+  line-height:1.15;
+  color:var(--pink-ink);
+  letter-spacing:.01em;
+}
+.stat b em{
+  font-style:normal;
+  font-size:16px;
+  margin-left:2px;
+  color:var(--ink-2);
+}
+.stat i{
+  display:block;
+  margin-top:7px;
+  font-style:normal;
+  font-size:12.5px;
+  color:var(--ink-2);
+  letter-spacing:.03em;
+}
+
+/* ===== 去过的城市 ===== */
+.place{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  margin-bottom:11px;
+  overflow:hidden;
+}
+.place summary{
+  list-style:none;
+  cursor:pointer;
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  padding:16px 18px;
+}
+.place summary::-webkit-details-marker{display:none}
+.place-name{
+  font-size:17px;
+  color:var(--ink);
+  letter-spacing:.02em;
+}
+.place-date{
+  font-size:12.5px;
+  color:var(--ink-3);
+  letter-spacing:.04em;
+}
+.place summary::after{
+  content:"+";
+  margin-left:auto;
+  color:var(--pink-deep);
+  font-size:19px;
+  line-height:1;
+}
+.place[open] summary::after{content:"−"}
+.place-body{padding:0 14px 16px}
+.place-note{
+  font-size:14px;
+  line-height:1.85;
+  color:var(--ink-2);
+  margin:0 0 12px;
+  padding:0 4px;
+}
+.place-photos{display:flex; gap:8px; align-items:flex-start}
+.place-photos img{
+  flex:1 1 0;
+  min-width:0;
+  width:100%;
+  aspect-ratio:3 / 4;
+  object-fit:cover;
+  border-radius:11px;
+  display:block;
+  background:var(--pink);
+}
+.place-photos.single img{width:100%;flex:none;aspect-ratio:auto;max-height:420px;object-fit:contain;background:transparent}
+
+/* ===== 一起吃过的 ===== */
+.food{
+  display:flex;
+  gap:13px;
+  align-items:center;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px;
+  margin-bottom:10px;
+}
+.food img{
+  width:66px;
+  height:66px;
+  flex:0 0 66px;
+  object-fit:cover;
+  border-radius:10px;
+  background:var(--pink);
+  display:block;
+}
+.food-txt{min-width:0}
+.food-t{
+  font-size:15px;
+  color:var(--ink);
+  line-height:1.4;
+}
+.food-d{
+  font-size:12.5px;
+  color:var(--ink-3);
+  margin-top:4px;
+  letter-spacing:.03em;
+}
+
 @media print{
   .hearts,.music,.bar{display:none}
   body{background:#fff}
@@ -785,6 +911,12 @@ input{font-family:inherit}
       </div>
     </div>
 
+    <div class="sec" id="secStats" hidden>
+      <p class="sec-label">NUMBERS</p>
+      <h3 class="sec-title">我们的数字</h3>
+      <div class="stats" id="statList"></div>
+    </div>
+
     <div class="divider"></div>
 
     <div class="sec" id="secTimeline">
@@ -801,10 +933,22 @@ input{font-family:inherit}
       <audio id="vAudio" preload="none" playsinline webkit-playsinline></audio>
     </div>
 
+    <div class="sec" id="secPlaces" hidden>
+      <p class="sec-label">PLACES</p>
+      <h3 class="sec-title">去过的城市</h3>
+      <div id="placeList"></div>
+    </div>
+
     <div class="sec" id="secGallery">
       <p class="sec-label">PHOTOS</p>
       <h3 class="sec-title" id="galTitle">一路上的样子</h3>
       <div class="gal" id="galList"></div>
+    </div>
+
+    <div class="sec" id="secFood" hidden>
+      <p class="sec-label">FOOD</p>
+      <h3 class="sec-title">一起吃过的</h3>
+      <div id="foodList"></div>
     </div>
 
     <div class="sec" id="secClips">
@@ -928,7 +1072,7 @@ input{font-family:inherit}
   var XOR = 7;
 
   var CFG = {};
-  var DATA = { timeline: [], voice: [], gallery: [], clips: [], letter: [], mine: [], hers: [], wish: [], quote: [], quiz: [], scratch: [] };
+  var DATA = { timeline: [], voice: [], gallery: [], clips: [], letter: [], mine: [], hers: [], wish: [], quote: [], quiz: [], scratch: [], stat: [], place: [], food: [] };
   var loaded = false;
   var quoteIndex = -1;
   var quizState = { i: 0, right: 0, locked: false };
@@ -1030,7 +1174,7 @@ input{font-family:inherit}
       if (DATA[type]) { DATA[type].push(item); }
     });
 
-    ['timeline', 'gallery', 'hers', 'mine', 'clips'].forEach(function (k) {
+    ['timeline', 'gallery', 'hers', 'mine', 'clips', 'place', 'food', 'stat'].forEach(function (k) {
       DATA[k].sort(function (a, b) {
         if (a.order !== b.order) { return a.order - b.order; }
         return String(a.date).localeCompare(String(b.date));
@@ -1396,11 +1540,75 @@ input{font-family:inherit}
     });
   }
 
+  /* ===== 我们的数字 ===== */
+  function renderStats() {
+    var box = $('statList');
+    if (!box) { return; }
+    var list = DATA.stat.filter(function (x) { return x.title; });
+    if (!list.length) { $('secStats').hidden = true; return; }
+    var html = '';
+    list.forEach(function (it) {
+      html += '<div class="stat"><b>' + esc(it.title) + '</b>';
+      if (it.content) { html += '<i>' + esc(it.content) + '</i>'; }
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    $('secStats').hidden = false;
+  }
+
+  /* ===== 去过的城市（每次 1 到 2 张，多张用 | 分隔）===== */
+  function renderPlaces() {
+    var box = $('placeList');
+    if (!box) { return; }
+    var list = DATA.place;
+    if (!list.length) { $('secPlaces').hidden = true; return; }
+    var html = '';
+    list.forEach(function (it, i) {
+      var imgs = String(it.image || '').split('|').map(function (s) { return s.trim(); }).filter(function (s) { return s; });
+      html += '<details class="place"' + (i === 0 ? ' open' : '') + '>';
+      html += '<summary><span class="place-name">' + esc(it.title) + '</span>';
+      if (it.date) { html += '<span class="place-date">' + esc(it.date) + '</span>'; }
+      html += '</summary><div class="place-body">';
+      if (it.content) { html += '<p class="place-note">' + esc(it.content) + '</p>'; }
+      if (imgs.length) {
+        html += '<div class="place-photos' + (imgs.length === 1 ? ' single' : '') + '">';
+        imgs.forEach(function (src) {
+          html += '<img src="' + esc(src) + '" alt="" loading="lazy">';
+        });
+        html += '</div>';
+      }
+      html += '</div></details>';
+    });
+    box.innerHTML = html;
+    $('secPlaces').hidden = false;
+    bindImageFail(box);
+  }
+
+  /* ===== 一起吃过的 ===== */
+  function renderFood() {
+    var box = $('foodList');
+    if (!box) { return; }
+    var list = DATA.food.filter(function (x) { return x.title; });
+    if (!list.length) { $('secFood').hidden = true; return; }
+    var html = '';
+    list.forEach(function (it) {
+      html += '<div class="food">';
+      if (it.image) {
+        html += '<img src="' + esc(it.image) + '" alt="" loading="lazy">';
+      }
+      html += '<div class="food-txt"><div class="food-t">' + esc(it.title) + '</div>';
+      if (it.content) { html += '<div class="food-d">' + esc(it.content) + '</div>'; }
+      html += '</div></div>';
+    });
+    box.innerHTML = html;
+    $('secFood').hidden = false;
+    bindImageFail(box);
+  }
+
   function renderClips() {
     var box = $('clipList');
     if (!box) { return; }
-    var list = DATA.clips.filter(function (x) { return x.image; });
-    if (!list.length) { $('secClips').hidden = true; return; }
+    var list = DATA.clips.filter(function (x) { return x.image; });    if (!list.length) { $('secClips').hidden = true; return; }
     var html = '';
     list.forEach(function (it) {
       html += '<figure class="clip">';
@@ -1691,9 +1899,12 @@ input{font-family:inherit}
       bindMusic();
 
       if (loaded) {
+        renderStats();
         renderTimeline();
         renderVoice();
+        renderPlaces();
         renderGallery();
+        renderFood();
         renderClips();
         renderLetter();
         renderMine();
