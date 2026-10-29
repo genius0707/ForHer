@@ -1704,7 +1704,7 @@ input{font-family:inherit}
     var html = '';
     list.forEach(function (it) {
       html += '<figure class="clip">';
-      html += '<video src="' + esc(it.image) + '" controls muted playsinline preload="metadata"></video>';
+      html += '<video src="' + esc(it.image) + '" controls muted playsinline preload="none" poster=""></video>';
       if (it.title) { html += '<figcaption>' + esc(it.title) + '</figcaption>'; }
       html += '</figure>';
     });
