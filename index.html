@@ -1372,31 +1372,47 @@ input{font-family:inherit}
     if (CFG.title) { document.title = CFG.title; }
   }
 
-  /* 进回忆录后，趁她看计时器那几秒，把后面的照片悄悄下完，滚到时不用等 */
+  /* 进回忆录后只按顺序预热开头 3 张，剩下的交给浏览器跟着滚动加载。
+     以前是一次把 49 张全下（约 7MB），首屏带宽被占满，滚动反而更卡。 */
   var warmed = false;
   function warmImages() {
     if (warmed) { return; }
     warmed = true;
-    setTimeout(function () {
-      var list = document.querySelectorAll('#v-memoir img[loading="lazy"]');
-      for (var i = 0; i < list.length; i++) {
-        var src = list[i].getAttribute('src');
-        if (src) { var pre = new Image(); pre.src = src; }
-      }
-    }, 600);
+    var list = document.querySelectorAll('#v-memoir img[loading="lazy"]');
+    var budget = Math.min(list.length, 3);
+    var i = 0;
+    function step() {
+      if (i >= budget) { return; }
+      var src = list[i].getAttribute('src');
+      i++;
+      if (!src) { setTimeout(step, 50); return; }
+      var pre = new Image();
+      pre.onload = pre.onerror = function () { setTimeout(step, 180); };
+      pre.src = src;
+    }
+    setTimeout(step, 700);
   }
 
   function bindMusic() {
     var audio = $('bgm'), btn = $('btnMusic'), txt = $('musicText');
     var src = CFG.bgm || '';
     if (!src) { btn.hidden = true; return; }
-    audio.src = src;
     var vol = parseFloat(CFG.bgm_volume);
     audio.volume = (vol >= 0 && vol <= 1) ? vol : 0.6;
     btn.hidden = false;
 
+    /* 点了才去要文件，5MB 的歌不在首屏抢带宽 */
+    var srcLoaded = false;
+    function ensureSrc() {
+      if (srcLoaded) { return; }
+      srcLoaded = true;
+      audio.src = src;
+      audio.load();
+    }
+
     btn.addEventListener('click', function () {
       if (audio.paused) {
+        ensureSrc();
         var pr = audio.play();
         if (pr && pr.then) {
           pr.then(function () {
@@ -1631,15 +1647,33 @@ input{font-family:inherit}
       if (imgs.length) {
         html += '<div class="place-photos' + (imgs.length === 1 ? ' single' : '') + '">';
         imgs.forEach(function (src) {
-          html += '<img src="' + esc(src) + '" alt="" loading="lazy">';
+          html += '<img data-src="' + esc(src) + '" alt="" loading="lazy" decoding="async">';
         });
         html += '</div>';
       }
       html += '</div></details>';
     });
     box.innerHTML = html;
+    /* 折叠着的城市先不下载图，点开哪座才拉哪座的 */
+    var dets = box.querySelectorAll('details.place');
+    for (var d = 0; d < dets.length; d++) {
+      (function (det) {
+        if (det.open) { fillPlaceImgs(det); }
+        det.addEventListener('toggle', function () {
+          if (det.open) { fillPlaceImgs(det); }
+        });
+      })(dets[d]);
+    }
     $('secPlaces').hidden = false;
     bindImageFail(box);
+  }
+
+  function fillPlaceImgs(det) {
+    var imgs = det.querySelectorAll('img[data-src]');
+    for (var i = 0; i < imgs.length; i++) {
+      imgs[i].src = imgs[i].getAttribute('data-src');
+      imgs[i].removeAttribute('data-src');
+    }
   }
 
   /* ===== 一起吃过的 ===== */
